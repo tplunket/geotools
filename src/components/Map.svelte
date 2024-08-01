@@ -3,7 +3,7 @@
 	import Map from 'ol/Map';
 	import View from 'ol/View';
 	import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-	import { OSM } from 'ol/source';
+	import { OSM, TileDebug } from 'ol/source';
 	import { Vector as VectorSource } from 'ol/source';
 	import { type Point } from '$lib/types';
 	import { Point as OlPoint } from 'ol/geom';
@@ -16,11 +16,24 @@
 	let map;
 	let vectorSource: VectorSource;
 	let vectorLayer: VectorLayer;
+	let debugLayer: TileLayer;
+	let debug = $state(false);
+
+	$effect(() => {
+		if (debugLayer) {
+			debugLayer.setVisible(debug);
+		}
+	});
 
 	$effect(() => {
 		vectorSource = new VectorSource();
 		vectorLayer = new VectorLayer({
 			source: vectorSource
+		});
+
+		debugLayer = new TileLayer({
+			source: new TileDebug(),
+			visible: false
 		});
 
 		map = new Map({
@@ -29,6 +42,7 @@
 				new TileLayer({
 					source: new OSM()
 				}),
+				debugLayer,
 				vectorLayer
 			],
 			view: new View({
@@ -59,11 +73,19 @@
 	});
 </script>
 
-<div id="map"></div>
+<div id="map">
+	<input
+		type="checkbox"
+		id="enable-debug"
+		onclick={() => (debug = !debug)}
+		value={debug}
+	/>
+	<label for="enable-debug">Enable Debug</label>
+</div>
 
 <style>
 	#map {
 		width: 100%;
-		height: 400px;
+		height: 512px;
 	}
 </style>

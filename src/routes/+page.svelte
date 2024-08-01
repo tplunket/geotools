@@ -43,12 +43,16 @@
 <style>
 	.container {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: center;
 		padding: 20px;
+		height: 100%;
+		width: 100%;
 	}
 
 	.form {
+		display: flex;
+		flex-direction: column;
 		margin-bottom: 20px;
 	}
 </style>
