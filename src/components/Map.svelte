@@ -53,23 +53,21 @@
 	});
 
 	$effect(() => {
-		if (my_state.points.length) {
-			console.log('num points:' + my_state.points.length);
-			vectorSource.clear();
-			my_state.points.forEach((point: Point) => {
-				const feature = new Feature({
-					geometry: new OlPoint(fromLonLat([point.longitude, point.latitude]))
-				});
-				feature.setStyle(
-					new Style({
-						image: new Icon({
-							src: 'https://openlayers.org/en/latest/examples/data/icon.png'
-						})
-					})
-				);
-				vectorSource.addFeature(feature);
+		console.log('num points:' + my_state.points.length);
+		vectorSource.clear();
+		my_state.points.forEach((point: Point) => {
+			const feature = new Feature({
+				geometry: new OlPoint(fromLonLat([point.longitude, point.latitude]))
 			});
-		}
+			feature.setStyle(
+				new Style({
+					image: new Icon({
+						src: 'https://openlayers.org/en/latest/examples/data/icon.png'
+					})
+				})
+			);
+			vectorSource.addFeature(feature);
+		});
 	});
 </script>
 
