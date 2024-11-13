@@ -13,6 +13,9 @@
 		points: []
 	});
 
+	let displayFormat = $state('decimal'); // 'decimal' or 'dms'
+	let showCardinal = $state(false);
+
 	function addPoint() {
 		const { latitude, longitude } = my_state;
 		if (
@@ -74,8 +77,35 @@
 		}
 	}
 
-	function formatCoordinate(value: number): string {
-		return value.toFixed(6);
+	function formatCoordinate(value: number, isLatitude: boolean): string {
+		if (displayFormat === 'decimal') {
+			const formatted = value.toFixed(6);
+			if (!showCardinal) return formatted;
+
+			// Add cardinal directions if requested
+			if (isLatitude) {
+				return `${Math.abs(value).toFixed(6)}${value >= 0 ? 'N' : 'S'}`;
+			} else {
+				return `${Math.abs(value).toFixed(6)}${value >= 0 ? 'E' : 'W'}`;
+			}
+		} else {
+			// Convert to DMS
+			const absolute = Math.abs(value);
+			const degrees = Math.floor(absolute);
+			const minutesFloat = (absolute - degrees) * 60;
+			const minutes = Math.floor(minutesFloat);
+			const seconds = ((minutesFloat - minutes) * 60).toFixed(2);
+
+			const dms = `${degrees}° ${minutes}' ${seconds}"`;
+			if (!showCardinal) return dms;
+
+			// Add cardinal directions if requested
+			if (isLatitude) {
+				return `${dms} ${value >= 0 ? 'N' : 'S'}`;
+			} else {
+				return `${dms} ${value >= 0 ? 'E' : 'W'}`;
+			}
+		}
 	}
 </script>
 
@@ -87,13 +117,13 @@
 				<div class="input-group">
 					<input
 						type="text"
-						value={formatCoordinate(point.latitude)}
+						value={formatCoordinate(point.latitude, true)}
 						class="coord-input"
 						readonly
 					/>
 					<input
 						type="text"
-						value={formatCoordinate(point.longitude)}
+						value={formatCoordinate(point.longitude, false)}
 						class="coord-input"
 						readonly
 					/>
@@ -127,6 +157,41 @@
 				/>
 				<button onclick={addPoint} class="add-button">+</button>
 			</div>
+			<div class="display-controls">
+				<div class="format-control">
+					<label>
+						<input
+							type="radio"
+							name="format"
+							value="decimal"
+							checked={displayFormat === 'decimal'}
+							onclick={() => (displayFormat = 'decimal')}
+						/>
+						Decimal Degrees
+					</label>
+					<label>
+						<input
+							type="radio"
+							name="format"
+							value="dms"
+							checked={displayFormat === 'dms'}
+							onclick={() => (displayFormat = 'dms')}
+						/>
+						DMS
+					</label>
+				</div>
+
+				<div class="cardinal-control">
+					<label>
+						<input
+							type="checkbox"
+							checked={showCardinal}
+							onclick={() => (showCardinal = !showCardinal)}
+						/>
+						Show Cardinal Directions
+					</label>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div class="map-container">
@@ -141,6 +206,7 @@
 		height: 100vh;
 		gap: 20px;
 		padding: 20px;
+		box-sizing: border-box;
 	}
 
 	.sidebar {
@@ -148,6 +214,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
+		overflow-y: auto;
 	}
 
 	.points-list {
@@ -155,12 +222,13 @@
 		background-color: #f5f5f5;
 		border-radius: 4px;
 		padding: 16px;
-		overflow-y: auto;
 	}
 
 	.map-container {
-		flex: 1;
-		height: 100%;
+		flex: 1 1 auto;
+		position: relative;
+		min-width: 0;
+		overflow: hidden;
 	}
 
 	.controls {
@@ -231,5 +299,30 @@
 
 	.remove-button:hover {
 		background-color: #bd3535;
+	}
+
+	.display-controls {
+		margin-top: 16px;
+		padding-top: 16px;
+		border-top: 1px solid #ddd;
+	}
+
+	.format-control {
+		margin-bottom: 12px;
+		display: flex;
+		gap: 16px;
+	}
+
+	.format-control label,
+	.cardinal-control label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+	}
+
+	input[type='radio'],
+	input[type='checkbox'] {
+		cursor: pointer;
 	}
 </style>

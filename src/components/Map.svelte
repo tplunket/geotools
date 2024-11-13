@@ -3,7 +3,7 @@
 	import Map from 'ol/Map';
 	import View from 'ol/View';
 	import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-	import { OSM, TileDebug } from 'ol/source';
+	import { OSM } from 'ol/source';
 	import { Vector as VectorSource } from 'ol/source';
 	import { type Point } from '$lib/types';
 	import { Point as OlPoint } from 'ol/geom';
@@ -16,14 +16,16 @@
 	let map;
 	let vectorSource: VectorSource;
 	let vectorLayer: VectorLayer;
-	let debugLayer: TileLayer;
-	let debug = $state(false);
+	let mapElement: HTMLElement;
 
-	$effect(() => {
-		if (debugLayer) {
-			debugLayer.setVisible(debug);
+	function forceMapResize() {
+		if (map) {
+			// Force multiple size updates to ensure proper rendering
+			map.updateSize();
+			setTimeout(() => map.updateSize(), 50);
+			setTimeout(() => map.updateSize(), 200);
 		}
-	});
+	}
 
 	$effect(() => {
 		vectorSource = new VectorSource();
@@ -31,25 +33,35 @@
 			source: vectorSource
 		});
 
-		debugLayer = new TileLayer({
-			source: new TileDebug(),
-			visible: false
-		});
-
 		map = new Map({
-			target: 'map',
+			target: mapElement,
 			layers: [
 				new TileLayer({
 					source: new OSM()
 				}),
-				debugLayer,
 				vectorLayer
 			],
 			view: new View({
 				center: fromLonLat([0, 0]),
 				zoom: 2
-			})
+			}),
+			controls: [] // Remove default controls if you don't need them
 		});
+
+		const updateSize = () => {
+			requestAnimationFrame(() => {
+				if (map) {
+					map.updateSize();
+				}
+			});
+		};
+
+		const resizeObserver = new ResizeObserver(updateSize);
+		resizeObserver.observe(mapElement);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
 	});
 
 	$effect(() => {
@@ -71,19 +83,25 @@
 	});
 </script>
 
-<div id="map">
-	<input
-		type="checkbox"
-		id="enable-debug"
-		onclick={() => (debug = !debug)}
-		value={debug}
-	/>
-	<label for="enable-debug">Enable Debug</label>
+<div class="map-wrapper">
+	<div id="map" bind:this={mapElement}></div>
 </div>
 
 <style>
-	#map {
+	.map-wrapper {
+		position: relative;
 		width: 100%;
-		height: 512px;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	#map {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		height: 100%;
 	}
 </style>
