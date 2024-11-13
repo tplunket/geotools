@@ -19,12 +19,12 @@
 	function addPoint() {
 		const { latitude, longitude } = my_state;
 		if (
-			!latitude ||
-			!longitude ||
-			isNaN(parseFloat(latitude)) ||
-			isNaN(parseFloat(longitude))
+			!isValidCoordinate(latitude, true) ||
+			!isValidCoordinate(longitude, false)
 		) {
-			alert('Please enter valid latitude and longitude values');
+			alert(
+				'Please enter valid coordinates:\nLatitude: -90 to +90\nLongitude: -180 to +180'
+			);
 			return;
 		}
 		my_state.points.push({
@@ -41,8 +41,15 @@
 		latitudeInput?.focus();
 	}
 
-	function isValidCoordinate(value: string): boolean {
-		return value !== '' && !isNaN(parseFloat(value));
+	function isValidCoordinate(value: string, isLatitude: boolean): boolean {
+		if (value === '' || isNaN(parseFloat(value))) return false;
+
+		const num = parseFloat(value);
+		if (isLatitude) {
+			return num >= -90 && num <= 90;
+		} else {
+			return num >= -180 && num <= 180;
+		}
 	}
 
 	function handleKeydown(
@@ -59,16 +66,16 @@
 		) as HTMLInputElement;
 
 		if (field === 'latitude') {
-			if (isValidCoordinate(my_state.latitude)) {
-				if (isValidCoordinate(my_state.longitude)) {
+			if (isValidCoordinate(my_state.latitude, true)) {
+				if (isValidCoordinate(my_state.longitude, false)) {
 					addPoint();
 				} else {
 					longitudeInput?.focus();
 				}
 			}
 		} else {
-			if (isValidCoordinate(my_state.longitude)) {
-				if (isValidCoordinate(my_state.latitude)) {
+			if (isValidCoordinate(my_state.longitude, false)) {
+				if (isValidCoordinate(my_state.latitude, true)) {
 					addPoint();
 				} else {
 					latitudeInput?.focus();
@@ -107,6 +114,15 @@
 			}
 		}
 	}
+
+	async function copyToClipboard(point: Point) {
+		const text = `${formatCoordinate(point.latitude, true)}, ${formatCoordinate(point.longitude, false)}`;
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch (err) {
+			console.error('Failed to copy text: ', err);
+		}
+	}
 </script>
 
 <div class="container">
@@ -115,15 +131,16 @@
 			<h3>Added Points</h3>
 			{#each my_state.points as point, i}
 				<div class="input-group">
+					<button
+						onclick={() => copyToClipboard(point)}
+						class="copy-button"
+						title="Copy to clipboard"
+					>
+						📋
+					</button>
 					<input
 						type="text"
-						value={formatCoordinate(point.latitude, true)}
-						class="coord-input"
-						readonly
-					/>
-					<input
-						type="text"
-						value={formatCoordinate(point.longitude, false)}
+						value={`${formatCoordinate(point.latitude, true)}, ${formatCoordinate(point.longitude, false)}`}
 						class="coord-input"
 						readonly
 					/>
@@ -215,6 +232,7 @@
 		flex-direction: column;
 		gap: 20px;
 		overflow-y: auto;
+		padding-right: 8px;
 	}
 
 	.points-list {
@@ -236,13 +254,16 @@
 		padding: 16px;
 		background-color: #f5f5f5;
 		border-radius: 4px;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.input-group {
 		display: flex;
 		gap: 8px;
 		align-items: center;
-		margin-bottom: 8px;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.input-group:last-child {
@@ -250,11 +271,14 @@
 	}
 
 	.coord-input {
-		width: 120px;
-		padding: 8px;
-		border: 1px solid #ccc;
+		flex: 1;
+		min-width: 0;
+		height: 32px;
+		padding: 0 8px;
+		border: 1px solid #ddd;
 		border-radius: 4px;
 		font-size: 14px;
+		font-family: monospace;
 	}
 
 	.coord-input:focus {
@@ -324,5 +348,26 @@
 	input[type='radio'],
 	input[type='checkbox'] {
 		cursor: pointer;
+	}
+
+	.copy-button {
+		background-color: #e5e7eb;
+		color: #6b7280;
+		border: none;
+		border-radius: 4px;
+		width: 32px;
+		height: 32px;
+		font-size: 16px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		transition: all 0.2s ease;
+	}
+
+	.copy-button:hover {
+		background-color: #4a90e2;
+		color: white;
 	}
 </style>
