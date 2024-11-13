@@ -13,19 +13,22 @@
 
 	let my_state: { points: Point[] } = $props();
 
-	let map;
+	let map: Map;
 	let vectorSource: VectorSource;
 	let vectorLayer: VectorLayer;
 	let mapElement: HTMLElement;
 
-	function forceMapResize() {
-		if (map) {
-			// Force multiple size updates to ensure proper rendering
-			map.updateSize();
-			setTimeout(() => map.updateSize(), 50);
-			setTimeout(() => map.updateSize(), 200);
-		}
-	}
+	//function forceMapResize() {
+	//	if (map) {
+	//		// Force multiple size updates to ensure proper rendering
+	//		//map.updateSize();
+	//		//setTimeout(() => map.updateSize(), 50);
+	//		console.log(`pre: ${map.getSize()}`);
+	//		map.setSize(map.getSize());
+	//		setTimeout(() => map.updateSize(), 200);
+	//		console.log(`post: ${map.getSize()}`);
+	//	}
+	//}
 
 	$effect(() => {
 		vectorSource = new VectorSource();
@@ -48,24 +51,35 @@
 			controls: [] // Remove default controls if you don't need them
 		});
 
-		const updateSize = () => {
-			requestAnimationFrame(() => {
-				if (map) {
-					map.updateSize();
-				}
-			});
-		};
+		//const updateSize = () => {
+		//	requestAnimationFrame(() => {
+		//		if (map) {
+		//			console.log(
+		//				`size: ${mapElement.clientWidth}x${mapElement.clientHeight}`
+		//			);
+		//			//map.updateSize();
+		//			forceMapResize();
+		//		}
+		//	});
+		//};
 
-		const resizeObserver = new ResizeObserver(updateSize);
-		resizeObserver.observe(mapElement);
+		map.on('change:size', () => {
+			const viewport = map.getViewport();
+			const view = map.getView();
+			const mapSize = map.getSize();
+			console.log(
+				`map size: ${mapSize} viewport size: ${viewport.clientWidth}x${viewport.clientHeight}`
+			);
+		});
+		//const resizeObserver = new ResizeObserver(updateSize);
+		//resizeObserver.observe(mapElement);
 
 		return () => {
-			resizeObserver.disconnect();
+			//resizeObserver.disconnect();
 		};
 	});
 
 	$effect(() => {
-		console.log('num points:' + my_state.points.length);
 		vectorSource.clear();
 		my_state.points.forEach((point: Point) => {
 			const feature = new Feature({
@@ -101,7 +115,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		width: 100%;
-		height: 100%;
+		width: 100vw;
+		height: 100vh;
 	}
 </style>
