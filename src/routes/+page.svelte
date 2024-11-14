@@ -77,8 +77,6 @@
 				const controlsRect = input.parentElement?.getBoundingClientRect();
 
 				if (controlsRect) {
-					console.log('controlsRect', controlsRect);
-					console.log('inputRect', inputRect);
 					errorDiv.style.left = `${inputRect.left - controlsRect.left + 16}px`;
 					errorDiv.style.top = `${inputRect.height + 16 + 4}px`; // 4px gap
 				}

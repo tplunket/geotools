@@ -18,18 +18,6 @@
 	let vectorLayer: VectorLayer;
 	let mapElement: HTMLElement;
 
-	//function forceMapResize() {
-	//	if (map) {
-	//		// Force multiple size updates to ensure proper rendering
-	//		//map.updateSize();
-	//		//setTimeout(() => map.updateSize(), 50);
-	//		console.log(`pre: ${map.getSize()}`);
-	//		map.setSize(map.getSize());
-	//		setTimeout(() => map.updateSize(), 200);
-	//		console.log(`post: ${map.getSize()}`);
-	//	}
-	//}
-
 	$effect(() => {
 		vectorSource = new VectorSource();
 		vectorLayer = new VectorLayer({
@@ -46,37 +34,13 @@
 			],
 			view: new View({
 				center: fromLonLat([0, 0]),
-				zoom: 2
+				zoom: 2,
+				minZoom: 0
 			}),
 			controls: [] // Remove default controls if you don't need them
 		});
 
-		//const updateSize = () => {
-		//	requestAnimationFrame(() => {
-		//		if (map) {
-		//			console.log(
-		//				`size: ${mapElement.clientWidth}x${mapElement.clientHeight}`
-		//			);
-		//			//map.updateSize();
-		//			forceMapResize();
-		//		}
-		//	});
-		//};
-
-		map.on('change:size', () => {
-			const viewport = map.getViewport();
-			const view = map.getView();
-			const mapSize = map.getSize();
-			console.log(
-				`map size: ${mapSize} viewport size: ${viewport.clientWidth}x${viewport.clientHeight}`
-			);
-		});
-		//const resizeObserver = new ResizeObserver(updateSize);
-		//resizeObserver.observe(mapElement);
-
-		return () => {
-			//resizeObserver.disconnect();
-		};
+		return () => {};
 	});
 
 	$effect(() => {
@@ -94,6 +58,29 @@
 			);
 			vectorSource.addFeature(feature);
 		});
+
+		// If there are points, fit the view to show all of them
+		if (my_state.points.length > 0) {
+			// Wait for the vector source to update
+			setTimeout(() => {
+				const extent = vectorSource.getExtent();
+				if (!extent || extent.some((val) => !isFinite(val))) {
+					console.warn('Invalid extent:', extent);
+					return;
+				}
+				map.getView().fit(extent, {
+					size: map.getSize(),
+					padding: [50, 50, 50, 50], // Increased padding for better visibility
+					duration: 1000,
+					maxZoom: 12,
+					callback: (complete: boolean) => {
+						if (!complete) {
+							console.warn('View fit animation was interrupted');
+						}
+					}
+				});
+			}, 100);
+		}
 	});
 </script>
 
@@ -115,7 +102,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		width: 100vw;
+		width: 100%;
 		height: 100vh;
 	}
 </style>
