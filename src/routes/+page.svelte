@@ -65,6 +65,40 @@
 			'input[placeholder="Longitude"]'
 		) as HTMLInputElement;
 
+		const showError = (message: string) => {
+			const errorDiv = document.createElement('div');
+			errorDiv.textContent = message;
+			errorDiv.className = 'error-message';
+
+			// Get the triggering input element and its position
+			const input = field === 'latitude' ? latitudeInput : longitudeInput;
+			if (input) {
+				const inputRect = input.getBoundingClientRect();
+				const controlsRect = input.parentElement?.getBoundingClientRect();
+
+				if (controlsRect) {
+					console.log('controlsRect', controlsRect);
+					console.log('inputRect', inputRect);
+					errorDiv.style.left = `${inputRect.left - controlsRect.left + 16}px`;
+					errorDiv.style.top = `${inputRect.height + 16 + 4}px`; // 4px gap
+				}
+
+				input.style.transition = 'border-color 0.5s';
+				input.style.borderColor = '#e24a4a';
+				setTimeout(() => {
+					input.style.borderColor = '';
+				}, 1000);
+			}
+
+			const controls = document.querySelector('.controls');
+			if (controls) {
+				(controls as HTMLElement).style.position = 'relative';
+				controls.appendChild(errorDiv);
+			}
+
+			setTimeout(() => errorDiv.remove(), 2000);
+		};
+
 		if (field === 'latitude') {
 			if (isValidCoordinate(my_state.latitude, true)) {
 				if (isValidCoordinate(my_state.longitude, false)) {
@@ -72,6 +106,8 @@
 				} else {
 					longitudeInput?.focus();
 				}
+			} else {
+				showError('Invalid latitude');
 			}
 		} else {
 			if (isValidCoordinate(my_state.longitude, false)) {
@@ -80,6 +116,8 @@
 				} else {
 					latitudeInput?.focus();
 				}
+			} else {
+				showError('Invalid longitude');
 			}
 		}
 	}
@@ -103,14 +141,14 @@
 			const minutes = Math.floor(minutesFloat);
 			const seconds = ((minutesFloat - minutes) * 60).toFixed(2);
 
-			const dms = `${degrees}° ${minutes}' ${seconds}"`;
+			const dms = `${degrees}°${minutes}'${seconds}"`;
 			if (!showCardinal) return dms;
 
 			// Add cardinal directions if requested
 			if (isLatitude) {
-				return `${dms} ${value >= 0 ? 'N' : 'S'}`;
+				return `${dms}${value >= 0 ? 'N' : 'S'}`;
 			} else {
-				return `${dms} ${value >= 0 ? 'E' : 'W'}`;
+				return `${dms}${value >= 0 ? 'E' : 'W'}`;
 			}
 		}
 	}
@@ -227,7 +265,7 @@
 	}
 
 	.sidebar {
-		flex: 0 0 300px;
+		flex: 0 0 350px;
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
@@ -272,7 +310,7 @@
 
 	.coord-input {
 		flex: 1;
-		min-width: 0;
+		min-width: 60px;
 		height: 32px;
 		padding: 0 8px;
 		border: 1px solid #ddd;
@@ -369,5 +407,18 @@
 	.copy-button:hover {
 		background-color: #4a90e2;
 		color: white;
+	}
+
+	:global(.error-message) {
+		position: absolute;
+		background: #e24a4a;
+		color: white;
+		padding: 8px 12px;
+		border-radius: 4px;
+		font-size: 14px;
+		z-index: 1000;
+		white-space: nowrap;
+		pointer-events: none;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 </style>
