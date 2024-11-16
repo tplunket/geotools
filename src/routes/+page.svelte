@@ -2,6 +2,7 @@
 	import type { Point } from '$lib/types';
 	import Map from '../components/Map.svelte';
 	import ErrorMessage from '../components/ErrorMessage.svelte';
+	import { formatCoordinate } from '$lib/coordinates';
 
 	type State = {
 		latitude: string;
@@ -14,7 +15,7 @@
 		points: []
 	});
 
-	let displayFormat = $state('decimal'); // 'decimal' or 'dms'
+	let displayFormat = $state<'decimal' | 'dms'>('decimal');
 	let showCardinal = $state(false);
 	let currentError: { message: string; target: HTMLElement } | null =
 		$state(null);
@@ -111,39 +112,8 @@
 		}
 	}
 
-	function formatCoordinate(value: number, isLatitude: boolean): string {
-		if (displayFormat === 'decimal') {
-			const formatted = value.toFixed(6);
-			if (!showCardinal) return formatted;
-
-			// Add cardinal directions if requested
-			if (isLatitude) {
-				return `${Math.abs(value).toFixed(6)}${value >= 0 ? 'N' : 'S'}`;
-			} else {
-				return `${Math.abs(value).toFixed(6)}${value >= 0 ? 'E' : 'W'}`;
-			}
-		} else {
-			// Convert to DMS
-			const absolute = Math.abs(value);
-			const degrees = Math.floor(absolute);
-			const minutesFloat = (absolute - degrees) * 60;
-			const minutes = Math.floor(minutesFloat);
-			const seconds = ((minutesFloat - minutes) * 60).toFixed(2);
-
-			const dms = `${degrees}°${minutes}'${seconds}"`;
-			if (!showCardinal) return dms;
-
-			// Add cardinal directions if requested
-			if (isLatitude) {
-				return `${dms}${value >= 0 ? 'N' : 'S'}`;
-			} else {
-				return `${dms}${value >= 0 ? 'E' : 'W'}`;
-			}
-		}
-	}
-
 	async function copyToClipboard(point: Point) {
-		const text = `${formatCoordinate(point.latitude, true)}, ${formatCoordinate(point.longitude, false)}`;
+		const text = `${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
 		try {
 			await navigator.clipboard.writeText(text);
 		} catch (err) {
@@ -167,7 +137,7 @@
 					</button>
 					<input
 						type="text"
-						value={`${formatCoordinate(point.latitude, true)}, ${formatCoordinate(point.longitude, false)}`}
+						value={`${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`}
 						class="coord-input"
 						readonly
 					/>
@@ -273,7 +243,11 @@
 		flex-grow: 1;
 		background-color: #f5f5f5;
 		border-radius: 4px;
-		padding: 16px;
+		padding: 12px 16px;
+	}
+
+	.points-list h3 {
+		margin: 0 0 12px 0;
 	}
 
 	.map-container {

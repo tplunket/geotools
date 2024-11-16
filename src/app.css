@@ -25,6 +25,7 @@ body > div {
 	height: 100%;
 }
 
+/*
 .sidebar {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -33,3 +34,4 @@ body > div {
 .sidebar::-webkit-scrollbar {
 	display: none;
 }
+*/
