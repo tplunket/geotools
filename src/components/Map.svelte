@@ -68,11 +68,15 @@
 					console.warn('Invalid extent:', extent);
 					return;
 				}
+				const currentZoom = map.getView().getZoom() ?? 0;
+				const naturalZoom = 6 + my_state.points.length;
+				const newZoom = Math.min(18, Math.max(currentZoom, naturalZoom));
+				const padding = 50;
 				map.getView().fit(extent, {
 					size: map.getSize(),
-					padding: [50, 50, 50, 50], // Increased padding for better visibility
+					padding: [padding, padding, padding, padding],
 					duration: 1000,
-					maxZoom: 12,
+					maxZoom: newZoom,
 					callback: (complete: boolean) => {
 						if (!complete) {
 							console.warn('View fit animation was interrupted');

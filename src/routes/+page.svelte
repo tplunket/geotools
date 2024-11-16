@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Point } from '$lib/types';
 	import Map from '../components/Map.svelte';
+	import ErrorMessage from '../components/error-message.svelte';
 
 	type State = {
 		latitude: string;
@@ -15,6 +16,8 @@
 
 	let displayFormat = $state('decimal'); // 'decimal' or 'dms'
 	let showCardinal = $state(false);
+	let currentError: { message: string; target: HTMLElement } | null =
+		$state(null);
 
 	function addPoint() {
 		const { latitude, longitude } = my_state;
@@ -66,35 +69,23 @@
 		) as HTMLInputElement;
 
 		const showError = (message: string) => {
-			const errorDiv = document.createElement('div');
-			errorDiv.textContent = message;
-			errorDiv.className = 'error-message';
-
-			// Get the triggering input element and its position
 			const input = field === 'latitude' ? latitudeInput : longitudeInput;
 			if (input) {
-				const inputRect = input.getBoundingClientRect();
-				const controlsRect = input.parentElement?.getBoundingClientRect();
+				// Set error state
+				currentError = { message, target: input };
 
-				if (controlsRect) {
-					errorDiv.style.left = `${inputRect.left - controlsRect.left + 16}px`;
-					errorDiv.style.top = `${inputRect.height + 16 + 4}px`; // 4px gap
-				}
-
-				input.style.transition = 'border-color 0.5s';
+				// Flash invalid input border
+				input.style.transition = 'border-color 1.0s';
 				input.style.borderColor = '#e24a4a';
 				setTimeout(() => {
 					input.style.borderColor = '';
-				}, 1000);
-			}
+				}, 2000);
 
-			const controls = document.querySelector('.controls');
-			if (controls) {
-				(controls as HTMLElement).style.position = 'relative';
-				controls.appendChild(errorDiv);
+				// Clear error after delay
+				setTimeout(() => {
+					currentError = null;
+				}, 2000);
 			}
-
-			setTimeout(() => errorDiv.remove(), 2000);
 		};
 
 		if (field === 'latitude') {
@@ -192,7 +183,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="controls">
+		<div class="controls" id="coordinate-controls">
 			<div class="input-group">
 				<input
 					type="text"
@@ -245,6 +236,13 @@
 					</label>
 				</div>
 			</div>
+			{#if currentError}
+				<ErrorMessage
+					message={currentError.message}
+					targetElement={currentError.target}
+					parentElement={document.querySelector('#coordinate-controls')}
+				/>
+			{/if}
 		</div>
 	</div>
 	<div class="map-container">
@@ -405,18 +403,5 @@
 	.copy-button:hover {
 		background-color: #4a90e2;
 		color: white;
-	}
-
-	:global(.error-message) {
-		position: absolute;
-		background: #e24a4a;
-		color: white;
-		padding: 8px 12px;
-		border-radius: 4px;
-		font-size: 14px;
-		z-index: 1000;
-		white-space: nowrap;
-		pointer-events: none;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 </style>
