@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Point } from '$lib/types';
 	import Map from '../components/Map.svelte';
-	import ErrorMessage from '../components/error-message.svelte';
+	import ErrorMessage from '../components/ErrorMessage.svelte';
 
 	type State = {
 		latitude: string;
@@ -284,6 +284,7 @@
 	}
 
 	.controls {
+		position: relative;
 		flex-shrink: 0;
 		padding: 16px;
 		background-color: #f5f5f5;
