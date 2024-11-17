@@ -119,6 +119,46 @@ describe.each([
 		decimal_c: '123.5W',
 		dms: "-123°30'",
 		dms_c: "123°30'W"
+	},
+	{
+		value: '35.28',
+		latitude: true,
+		decimal: '35.28',
+		decimal_c: '35.28N',
+		dms: '35°16\'48"',
+		dms_c: '35°16\'48"N'
+	},
+	{
+		value: '110.732',
+		latitude: false,
+		decimal: '110.732',
+		decimal_c: '110.732E',
+		dms: '110°43\'55.2"',
+		dms_c: '110°43\'55.2"E'
+	},
+	{
+		value: '-40.12',
+		latitude: true,
+		decimal: '-40.12',
+		decimal_c: '40.12S',
+		dms: '-40°07\'12"',
+		dms_c: '40°07\'12"S'
+	},
+	{
+		value: '-84.1213',
+		latitude: false,
+		decimal: '-84.1213',
+		decimal_c: '84.1213W',
+		dms: '-84°07\'16.68"',
+		dms_c: '84°07\'16.68"W'
+	},
+	{
+		value: '-99.999999', // testing the cascading of rounding
+		latitude: false,
+		decimal: '-99.999999',
+		decimal_c: '99.999999W',
+		dms: '-100°',
+		dms_c: '100°W'
 	}
 ])(
 	'formatCoordinate',

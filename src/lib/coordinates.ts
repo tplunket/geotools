@@ -36,12 +36,24 @@ export function formatCoordinate(
 		// Convert to DMS
 		const sign = value < 0 ? '-' : '';
 		const absolute = Math.abs(value);
-		const degrees = Math.floor(absolute);
+		let degrees = Math.floor(absolute);
 		const minutesFloat = (absolute - degrees) * 60;
-		const minutes = Math.floor(minutesFloat);
+		let minutes = Math.floor(minutesFloat);
 		const secondsFloat = (minutesFloat - minutes) * 60;
-		const seconds = Math.floor(secondsFloat);
-		const subSeconds = Math.round((secondsFloat - seconds) * 100);
+		let seconds = Math.floor(secondsFloat);
+		let subSeconds = Math.round((secondsFloat - seconds) * 100);
+		if (subSeconds >= 100) {
+			seconds += 1;
+			subSeconds -= 100;
+		}
+		if (seconds >= 60) {
+			minutes += 1;
+			seconds -= 60;
+		}
+		if (minutes >= 60) {
+			degrees += 1;
+			minutes -= 60;
+		}
 		const subSecondsString = `.${subSeconds}`.replace(/[.0]+$/, '');
 
 		const twoDigits = (n: number) => n.toString().padStart(2, '0');
