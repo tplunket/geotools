@@ -9,7 +9,7 @@
 	import { Point as OlPoint } from 'ol/geom';
 	import { Feature } from 'ol';
 	import { fromLonLat } from 'ol/proj';
-	import { Style, Icon } from 'ol/style';
+	import { Style, Circle, Fill, Stroke } from 'ol/style';
 	import { defaults as defaultControls } from 'ol/control';
 	import { GridLayerControl } from '$lib/grid-layer-control';
 
@@ -74,8 +74,10 @@
 			});
 			feature.setStyle(
 				new Style({
-					image: new Icon({
-						src: 'https://openlayers.org/en/latest/examples/data/icon.png'
+					image: new Circle({
+						radius: 7,
+						fill: new Fill({ color: 'red' }),
+						stroke: new Stroke({ color: 'magenta', width: 2 })
 					})
 				})
 			);
