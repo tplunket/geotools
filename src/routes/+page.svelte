@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Map from '$components/Map.svelte';
 	import ErrorMessage from '$components/ErrorMessage.svelte';
-	import { formatCoordinate } from '$lib/coordinates';
+	import { formatCoordinate, isValidCoordinate } from '$lib/coordinates';
 
 	type LatLon = {
 		latitude: string;
@@ -46,17 +46,6 @@
 			'input[placeholder="Latitude"]'
 		) as HTMLInputElement;
 		latitudeInput?.focus();
-	}
-
-	function isValidCoordinate(value: string, isLatitude: boolean): boolean {
-		if (value === '' || isNaN(parseFloat(value))) return false;
-
-		const num = parseFloat(value);
-		if (isLatitude) {
-			return num >= -90 && num <= 90;
-		} else {
-			return num >= -180 && num <= 180;
-		}
 	}
 
 	function handleKeydown(

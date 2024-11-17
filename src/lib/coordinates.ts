@@ -1,3 +1,14 @@
+export function isValidCoordinate(value: string, isLatitude: boolean): boolean {
+	if (value === '' || isNaN(parseFloat(value))) return false;
+
+	const num = parseFloat(value);
+	if (isLatitude) {
+		return num >= -90 && num <= 90;
+	} else {
+		return num >= -180 && num <= 180;
+	}
+}
+
 export function formatCoordinate(
 	valueString: string,
 	isLatitude: boolean,

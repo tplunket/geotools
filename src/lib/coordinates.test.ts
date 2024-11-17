@@ -1,5 +1,35 @@
 import { describe, it, expect } from 'vitest';
-import { formatCoordinate } from './coordinates';
+import { formatCoordinate, isValidCoordinate } from './coordinates';
+
+describe('isValidCoordinate', () => {
+	// Latitude tests
+	it.each([
+		['0', true],
+		['90', true],
+		['-90', true],
+		['45.123456', true],
+		['90.1', false],
+		['-90.1', false],
+		['', false],
+		['invalid', false]
+	])('validates latitude value %s as %s', (value, expected) => {
+		expect(isValidCoordinate(value, true)).toBe(expected);
+	});
+
+	// Longitude tests
+	it.each([
+		['0', true],
+		['180', true],
+		['-180', true],
+		['123.456789', true],
+		['180.1', false],
+		['-180.1', false],
+		['', false],
+		['invalid', false]
+	])('validates longitude value %s as %s', (value, expected) => {
+		expect(isValidCoordinate(value, false)).toBe(expected);
+	});
+});
 
 describe.each([
 	{
