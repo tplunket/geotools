@@ -4,10 +4,14 @@
 	import ErrorMessage from '../components/ErrorMessage.svelte';
 	import { formatCoordinate } from '$lib/coordinates';
 
+	type LatLon = {
+		latitude: string;
+		longitude: string;
+	};
 	type State = {
 		latitude: string;
 		longitude: string;
-		points: Point[];
+		points: LatLon[];
 	};
 	let my_state = $state<State>({
 		latitude: '',
@@ -32,8 +36,8 @@
 			return;
 		}
 		my_state.points.push({
-			latitude: parseFloat(latitude),
-			longitude: parseFloat(longitude)
+			latitude: latitude,
+			longitude: longitude
 		});
 		my_state.latitude = '';
 		my_state.longitude = '';
@@ -112,7 +116,7 @@
 		}
 	}
 
-	async function copyToClipboard(point: Point) {
+	async function copyToClipboard(point: LatLon) {
 		const text = `${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
 		try {
 			await navigator.clipboard.writeText(text);
@@ -216,7 +220,12 @@
 		</div>
 	</div>
 	<div class="map-container">
-		<Map points={my_state.points} />
+		<Map
+			points={my_state.points.map((p) => ({
+				latitude: parseFloat(p.latitude),
+				longitude: parseFloat(p.longitude)
+			}))}
+		/>
 	</div>
 </div>
 
