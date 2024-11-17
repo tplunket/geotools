@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { Point } from '$lib/types';
-	import Map from '../components/Map.svelte';
-	import ErrorMessage from '../components/ErrorMessage.svelte';
+	import Map from '$components/Map.svelte';
+	import ErrorMessage from '$components/ErrorMessage.svelte';
 	import { formatCoordinate } from '$lib/coordinates';
 
 	type LatLon = {
