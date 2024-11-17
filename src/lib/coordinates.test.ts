@@ -67,6 +67,14 @@ describe.each([
 		dms_c: '123°27\'24.44"W'
 	},
 	{
+		value: '-98.45689',
+		latitude: false,
+		decimal: '-98.45689',
+		decimal_c: '98.45689W',
+		dms: '-98°27\'24.8"',
+		dms_c: '98°27\'24.8"W'
+	},
+	{
 		value: '45.5',
 		latitude: true,
 		decimal: '45.5',
@@ -85,28 +93,24 @@ describe.each([
 ])(
 	'formatCoordinate',
 	({ value, latitude, decimal, decimal_c, dms, dms_c }) => {
-		describe('decimal format', () => {
-			it('formats coordinate as decimal without cardinal', () => {
-				expect(formatCoordinate(value, latitude, 'decimal', false)).toBe(
-					decimal
-				);
-			});
-
-			it('formats coordinate as decimal with cardinal', () => {
-				expect(formatCoordinate(value, latitude, 'decimal', true)).toBe(
-					decimal_c
-				);
-			});
+		// Decimal format
+		it(`formats ${value} as decimal without cardinal`, () => {
+			expect(formatCoordinate(value, latitude, 'decimal', false)).toBe(decimal);
 		});
 
-		describe('DMS format', () => {
-			it('formats coordinate as DMS without cardinal', () => {
-				expect(formatCoordinate(value, latitude, 'dms', false)).toBe(dms);
-			});
+		it(`formats ${value} as decimal with cardinal`, () => {
+			expect(formatCoordinate(value, latitude, 'decimal', true)).toBe(
+				decimal_c
+			);
+		});
 
-			it('formats coordinate as DMS with cardinal', () => {
-				expect(formatCoordinate(value, latitude, 'dms', true)).toBe(dms_c);
-			});
+		// DMS format
+		it(`formats ${value} as DMS without cardinal`, () => {
+			expect(formatCoordinate(value, latitude, 'dms', false)).toBe(dms);
+		});
+
+		it(`formats ${value} as DMS with cardinal`, () => {
+			expect(formatCoordinate(value, latitude, 'dms', true)).toBe(dms_c);
 		});
 	}
 );
