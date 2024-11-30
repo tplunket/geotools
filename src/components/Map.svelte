@@ -12,8 +12,7 @@
 	import { Style, Circle, Fill, Stroke } from 'ol/style';
 	import { defaults as defaultControls } from 'ol/control';
 	import { GridLayerControl } from '$lib/grid-layer-control';
-
-	let my_state: { points: Point[] } = $props();
+	import { globals } from '$lib/global-data.svelte';
 
 	let map: Map;
 	let vectorSource: VectorSource;
@@ -68,7 +67,7 @@
 
 	$effect(() => {
 		vectorSource.clear();
-		my_state.points.forEach((point: Point) => {
+		globals.points.forEach((point: Point) => {
 			const feature = new Feature({
 				geometry: new OlPoint(fromLonLat([point.longitude, point.latitude]))
 			});
@@ -85,7 +84,7 @@
 		});
 
 		// If there are points, fit the view to show all of them
-		if (my_state.points.length > 0) {
+		if (globals.points.length > 0) {
 			// Wait for the vector source to update
 			setTimeout(() => {
 				const extent = vectorSource.getExtent();
@@ -94,7 +93,7 @@
 					return;
 				}
 				const currentZoom = map.getView().getZoom() ?? 0;
-				const naturalZoom = 6 + my_state.points.length;
+				const naturalZoom = 6 + globals.points.length;
 				const newZoom = Math.min(18, Math.max(currentZoom, naturalZoom));
 				const padding = 50;
 				map.getView().fit(extent, {
