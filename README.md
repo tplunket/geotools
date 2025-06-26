@@ -6,16 +6,15 @@ project's key components are Svelte 5 and OpenLayers. I removed TailwindCSS from
 SvelteKit installation because it exerts too much control over the way divs resize when the browser
 does. I can understand why it does that but it's super annoying for an application like this.
 
-## Development
+## Features
 
-With `npm` installed, I think it's just `npm install` to get dependencies installed and then `npm
-run dev` to spin up a Vite-backed development server. Alternatively, the `npm test` command will run
-a file-watching unit test harness and `npm test run` will run the tests one-shot.
-
-## Deployment
-
-Just do `npm run build` and copy the contents of the `build` directory somewhere that can serve it.
-
-# Caveat
-
-I have no idea what I'm doing.
+- Click on the map to place markers, which creates an entry in the location list
+- Manually add a location to the list, which creates a marker
+- Colors cycle as markers are created, entries in the location list and the markers on the map share the same color for easy identification
+- Hovering items in the location list or on the map highlights the corresponding other item
+- Pasting into a new entry in the location list accepts either a single latitude or longitude, a lat/lon pair, or a list of latitudes and longitudes and the software creates as many entries as necessary
+- Individual entries in the location list can be swapped (lat<-\>lon) in case the source has them reversed
+- The location list can show latitude/longitude or longitude/latitude depending on your needs
+- Pasted lat/lons can be in decimal degrees or DMS and the rendered representation can also be switched between these modes
+- The degrees and quote marks for DMS can be used or the letters 'dms' can be used instead
+- The list of lat/lons can be copied to the clipboard to facilitate use in your own applications
