@@ -1,16 +1,61 @@
 # The development workflow
 
-## Development
+This document provides instructions for setting up the development environment, running tests, and building the application for production.
 
-With `npm` installed, I think it's just `npm install` to get dependencies installed and then `npm
-run dev` to spin up a Vite-backed development server. Alternatively, the `npm test` command will run
-a file-watching unit test harness and `npm test run` will run the tests one-shot.
+## Prerequisites
 
-## Deployment
+- Node.js (version 18 or higher is recommended)
+- npm (usually comes with Node.js)
 
-Just do `npm run build` and copy the contents of the `build` directory somewhere that can serve it.
+While you can install Node.js and npm directly, it is highly recommended to use a version manager. A version manager makes it easy to install and switch between different Node.js versions on your system and helps avoid potential permission issues.
 
-# Caveat
+- **For macOS, Linux, or WSL:** Use [nvm (Node Version Manager)](https://github.com/nvm-sh/nvm).
+- **For Windows:** Use [nvm-for-windows](https://github.com/coreybutler/nvm-windows).
 
-I have no idea what I'm doing and I'm going to see what AI can do for this project.
+After installing a version manager, you can install the recommended Node.js version by running a command like `nvm install --lts`.
 
+## Installation
+
+To get started, clone the repository and install the project dependencies:
+
+```bash
+git clone <repository-url>
+cd geotools
+npm install
+```
+
+## Running the Development Server
+
+To start the Vite development server with hot-reloading:
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173` by default.
+
+## Testing
+
+This project uses Vitest for unit and component testing.
+
+To run tests in watch mode:
+
+```bash
+npm test
+```
+
+To run all tests once:
+
+```bash
+npm test -- run
+```
+
+## Building for Production
+
+To create a production-ready build of the application:
+
+```bash
+npm run build
+```
+
+The output will be in the `build/` directory. This static output can be served by any web server.
