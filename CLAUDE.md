@@ -50,3 +50,4 @@ This is a SvelteKit application using Svelte 5 and OpenLayers for interactive ma
 ## Development Process
 
 - Please keep the task list updated in the @docs\TASKS.md file as we work.
+- Ensure that the near term plan is regularly updated in @docs/PLAN.md

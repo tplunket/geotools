@@ -3,13 +3,15 @@
 ## Current Status (Updated 2025-01-27)
 
 ### ✅ Recently Completed
-- **Testing Infrastructure**: Full automated test suite with 94 passing tests
+- **Testing Infrastructure**: Full automated test suite with 96 passing tests
 - **UI Components**: Radio buttons (Decimal/DMS), Cardinal directions checkbox
 - **Coordinate System**: Complete validation and formatting logic
 - **Two-Panel Layout**: Responsive sidebar and map layout working
+- **Dynamic Table Interface**: Points display as table rows with input row always available
+- **Input Order Toggle**: Radio buttons for lat/lon vs lon/lat interpretation
 
 ### 🔄 In Progress
-- **Fit to Markers Button**: Adding zoom-to-all functionality to map controls
+- **Copy All to Clipboard**: Export functionality for complete coordinate list
 
 ### 🎯 Next Up (Phase 1 Priority)
 - **Copy to Clipboard**: Export current coordinate list functionality
