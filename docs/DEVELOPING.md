@@ -41,13 +41,13 @@ This project uses Vitest for unit and component testing.
 To run tests in watch mode:
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 To run all tests once:
 
 ```bash
-npm test -- run
+npm test
 ```
 
 ## Building for Production
