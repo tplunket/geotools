@@ -16,6 +16,11 @@
 	});
 
 	let displayFormat = $state<CoordinateFormat>('decimal');
+	
+	// Sync display format with global state for map tooltips
+	$effect(() => {
+		globals.displayFormat = displayFormat;
+	});
 	let showCardinal = $state(false);
 	let inputOrder = $state<'lat-lon' | 'lon-lat'>('lat-lon');
 	let currentError: { message: string; target: HTMLElement } | null =

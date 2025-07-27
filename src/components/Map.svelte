@@ -11,8 +11,10 @@
 	import { fromLonLat } from 'ol/proj';
 	import { Style, Circle, Fill, Stroke } from 'ol/style';
 	import { defaults as defaultControls } from 'ol/control';
+	import Overlay from 'ol/Overlay';
 	import { GridLayerControl } from '$lib/grid-layer-control';
 	import { FitMarkersControl } from '$lib/fit-markers-control';
+	import { formatCoordinate } from '$lib/coordinates';
 	import { globals } from '$lib/global-data.svelte';
 
 	let map: Map;
@@ -20,6 +22,8 @@
 	let vectorLayer: VectorLayer;
 	let gridLayer: TileLayer;
 	let mapElement: HTMLElement;
+	let tooltipElement: HTMLElement;
+	let tooltipOverlay: Overlay;
 
 	let showGridLayer = $state(true);
 
@@ -30,6 +34,13 @@
 		});
 		gridLayer = new TileLayer({
 			source: new TileDebug()
+		});
+
+		// Create tooltip overlay
+		tooltipOverlay = new Overlay({
+			element: tooltipElement,
+			offset: [15, 0],
+			positioning: 'center-left'
 		});
 
 		map = new Map({
@@ -51,7 +62,30 @@
 					showGridLayer = value;
 				}),
 				new FitMarkersControl(() => vectorSource)
-			])
+			]),
+			overlays: [tooltipOverlay]
+		});
+
+		// Add tooltip interaction
+		map.on('pointermove', (event) => {
+			const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+			
+			if (feature && feature.get('isMarker')) {
+				const coordinates = feature.get('coordinates');
+				if (coordinates) {
+					const { latitude, longitude } = coordinates;
+					
+					// Always display in lat-lon order with cardinal directions
+					const latText = formatCoordinate(latitude.toString(), true, globals.displayFormat, true);
+					const lonText = formatCoordinate(longitude.toString(), false, globals.displayFormat, true);
+					
+					tooltipElement.innerHTML = `${latText}, ${lonText}`;
+					tooltipOverlay.setPosition(event.coordinate);
+					tooltipElement.style.display = 'block';
+				}
+			} else {
+				tooltipElement.style.display = 'none';
+			}
 		});
 
 		// Force map to recalculate its size after container is properly set up
@@ -78,6 +112,14 @@
 			const feature = new Feature({
 				geometry: new OlPoint(fromLonLat([point.longitude, point.latitude]))
 			});
+			
+			// Store coordinate data and marker flag for tooltip
+			feature.set('isMarker', true);
+			feature.set('coordinates', {
+				latitude: point.latitude,
+				longitude: point.longitude
+			});
+			
 			feature.setStyle(
 				new Style({
 					image: new Circle({
@@ -121,6 +163,7 @@
 
 <div class="map-wrapper">
 	<div id="map" bind:this={mapElement}></div>
+	<div class="tooltip" bind:this={tooltipElement}></div>
 </div>
 
 <style>
@@ -186,5 +229,21 @@
 		bottom: 42px;
 		right: 2px;
 		border-radius: 10px 0 0;
+	}
+
+	.tooltip {
+		background-color: rgba(0, 0, 0, 0.8);
+		color: white;
+		padding: 6px 10px;
+		border-radius: 4px;
+		font-family: monospace;
+		font-size: 12px;
+		font-weight: 500;
+		white-space: nowrap;
+		pointer-events: none;
+		display: none;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		z-index: 1000;
 	}
 </style>
