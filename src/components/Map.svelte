@@ -142,7 +142,7 @@
 	}
 
 	:global(.fit-markers-control) {
-		top: 100px;
+		top: 83px;
 		left: 0.5em;
 	}
 

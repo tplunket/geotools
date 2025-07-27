@@ -9,3 +9,9 @@ export type LatLon = {
 };
 
 export type CoordinateFormat = 'decimal' | 'dms';
+
+export interface CoordinateValidationResult {
+	isValid: boolean;
+	clampedValue?: number;
+	warning?: string;
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatCoordinate, isValidCoordinate } from '$lib/coordinates';
+	import { formatCoordinate, isValidCoordinate, validateLatitude } from '$lib/coordinates';
 	import ErrorMessage from '$components/ErrorMessage.svelte';
 	import type { LatLon, Point, CoordinateFormat } from '$lib/types';
 	import { globals } from '$lib/global-data.svelte';
@@ -49,6 +49,7 @@
 	function addPoint() {
 		const { latitude, longitude } = my_state;
 		
+		// Basic validation for both coordinates
 		if (
 			!isValidCoordinate(latitude, true) ||
 			!isValidCoordinate(longitude, false)
@@ -58,13 +59,34 @@
 			);
 			return;
 		}
+
+		// Special validation for latitude polar regions
+		const latValidation = validateLatitude(latitude);
+		if (!latValidation.isValid) {
+			alert('Invalid latitude value');
+			return;
+		}
+
+		let finalLatitude = parseFloat(latitude);
+		
+		// Handle polar clamping and warning
+		if (latValidation.clampedValue !== undefined) {
+			const proceed = confirm(`${latValidation.warning}\n\nProceed with clamped value?`);
+			if (!proceed) {
+				return;
+			}
+			finalLatitude = latValidation.clampedValue;
+		}
+
+		const finalLongitude = parseFloat(longitude);
+
 		my_state.points.push({
-			latitude: latitude,
+			latitude: finalLatitude.toString(),
 			longitude: longitude
 		});
 		globals.points.push({
-			latitude: parseFloat(latitude),
-			longitude: parseFloat(longitude)
+			latitude: finalLatitude,
+			longitude: finalLongitude
 		});
 		my_state.latitude = '';
 		my_state.longitude = '';
