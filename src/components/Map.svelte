@@ -54,6 +54,11 @@
 			])
 		});
 
+		// Force map to recalculate its size after container is properly set up
+		setTimeout(() => {
+			map.updateSize();
+		}, 100);
+
 		return () => {};
 	});
 
@@ -133,7 +138,7 @@
 		right: 0;
 		bottom: 0;
 		width: 100%;
-		height: 100vh;
+		height: 100%;
 	}
 
 	:global(.debug-layer-control) {
