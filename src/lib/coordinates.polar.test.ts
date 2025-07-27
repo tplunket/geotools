@@ -20,7 +20,7 @@ describe('Polar Latitude Validation', () => {
 		it('should clamp North polar latitudes', () => {
 			const result = validateLatitude('87.0');
 			expect(result.isValid).toBe(true);
-			expect(result.clampedValue).toBeCloseTo(WEB_MERCATOR_LATITUDE_LIMIT, 5);
+			expect(result.clampedValue).toBe(WEB_MERCATOR_LATITUDE_LIMIT);
 			expect(result.warning).toContain('North polar region');
 			expect(result.warning).toContain('Clamped to');
 		});
@@ -28,7 +28,7 @@ describe('Polar Latitude Validation', () => {
 		it('should clamp South polar latitudes', () => {
 			const result = validateLatitude('-87.0');
 			expect(result.isValid).toBe(true);
-			expect(result.clampedValue).toBeCloseTo(-WEB_MERCATOR_LATITUDE_LIMIT, 5);
+			expect(result.clampedValue).toBe(-WEB_MERCATOR_LATITUDE_LIMIT);
 			expect(result.warning).toContain('South polar region');
 			expect(result.warning).toContain('Clamped to');
 		});
@@ -36,7 +36,7 @@ describe('Polar Latitude Validation', () => {
 		it('should handle extreme polar latitudes', () => {
 			const result = validateLatitude('89.9');
 			expect(result.isValid).toBe(true);
-			expect(result.clampedValue).toBeCloseTo(WEB_MERCATOR_LATITUDE_LIMIT, 5);
+			expect(result.clampedValue).toBe(WEB_MERCATOR_LATITUDE_LIMIT);
 			expect(result.warning).toContain('89.9°');
 		});
 
@@ -73,18 +73,18 @@ describe('Polar Latitude Validation', () => {
 			expect(result.isValid).toBe(true);
 			expect(result.clampedValue).toBe(WEB_MERCATOR_LATITUDE_LIMIT);
 			expect(result.warning).toContain(testLatitude);
-			expect(result.warning).toContain(WEB_MERCATOR_LATITUDE_LIMIT.toFixed(5));
+			expect(result.warning).toContain('85°');
 		});
 
 		it('should handle edge cases near the limit', () => {
 			// Just above the limit
-			const aboveLimit = (WEB_MERCATOR_LATITUDE_LIMIT + 0.001).toString();
+			const aboveLimit = '85.001';
 			const resultAbove = validateLatitude(aboveLimit);
 			expect(resultAbove.isValid).toBe(true);
 			expect(resultAbove.clampedValue).toBe(WEB_MERCATOR_LATITUDE_LIMIT);
 
 			// Just below the limit
-			const belowLimit = (WEB_MERCATOR_LATITUDE_LIMIT - 0.001).toString();
+			const belowLimit = '84.999';
 			const resultBelow = validateLatitude(belowLimit);
 			expect(resultBelow.isValid).toBe(true);
 			expect(resultBelow.clampedValue).toBeUndefined();
@@ -92,9 +92,9 @@ describe('Polar Latitude Validation', () => {
 	});
 
 	describe('Web Mercator Constants', () => {
-		it('should have correct Web Mercator latitude limit', () => {
-			// Standard Web Mercator limit is approximately 85.05112878°
-			expect(WEB_MERCATOR_LATITUDE_LIMIT).toBeCloseTo(85.05112878, 6);
+		it('should have practical latitude limit for marker display', () => {
+			// Practical limit set to 85° for better marker display (rounded from 85.05112878°)
+			expect(WEB_MERCATOR_LATITUDE_LIMIT).toBe(85);
 		});
 	});
 });

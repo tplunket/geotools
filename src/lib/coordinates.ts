@@ -1,7 +1,7 @@
 import type { CoordinateValidationResult } from './types';
 
-// Web Mercator projection limits (EPSG:3857)
-export const WEB_MERCATOR_LATITUDE_LIMIT = 85.05112878;
+// Practical latitude limit for marker display (rounded from Web Mercator limit of 85.05112878°)
+export const WEB_MERCATOR_LATITUDE_LIMIT = 85;
 
 export function validateLatitude(value: string): CoordinateValidationResult {
 	if (value === '' || isNaN(parseFloat(value))) {
@@ -22,7 +22,7 @@ export function validateLatitude(value: string): CoordinateValidationResult {
 		return {
 			isValid: true,
 			clampedValue,
-			warning: `Latitude ${num}° is in the ${pole} polar region. Clamped to ${clampedValue.toFixed(5)}° for Web Mercator display.`
+			warning: `Latitude ${num}° is in the ${pole} polar region. Clamped to ${clampedValue}° for optimal marker display.`
 		};
 	}
 
