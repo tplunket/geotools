@@ -12,6 +12,7 @@
 	import { Style, Circle, Fill, Stroke } from 'ol/style';
 	import { defaults as defaultControls } from 'ol/control';
 	import { GridLayerControl } from '$lib/grid-layer-control';
+	import { FitMarkersControl } from '$lib/fit-markers-control';
 	import { globals } from '$lib/global-data.svelte';
 
 	let map: Map;
@@ -48,7 +49,8 @@
 			controls: defaultControls().extend([
 				new GridLayerControl((value) => {
 					showGridLayer = value;
-				})
+				}),
+				new FitMarkersControl(() => vectorSource)
 			])
 		});
 
@@ -139,7 +141,13 @@
 		left: 0.5em;
 	}
 
-	:global(.debug-layer-control button) {
+	:global(.fit-markers-control) {
+		top: 100px;
+		left: 0.5em;
+	}
+
+	:global(.debug-layer-control button),
+	:global(.fit-markers-control button) {
 		padding: 4px !important;
 		display: flex !important;
 		align-items: center;
@@ -154,13 +162,19 @@
 		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
 	}
 
-	:global(.debug-layer-control svg) {
+	:global(.debug-layer-control svg),
+	:global(.fit-markers-control svg) {
 		display: block;
 		fill: currentColor;
 	}
 
-	:global(.debug-layer-control button:hover svg) {
+	:global(.debug-layer-control button:hover svg),
+	:global(.fit-markers-control button:hover svg) {
 		fill: #333;
+	}
+
+	:global(.fit-markers-control button:hover) {
+		background-color: rgba(255, 255, 255, 0.95) !important;
 	}
 
 	:global(.ol-attribution) {

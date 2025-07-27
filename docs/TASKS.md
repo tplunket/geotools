@@ -3,18 +3,16 @@
 ## Current Status (Updated 2025-01-27)
 
 ### ✅ Recently Completed
-- **Testing Infrastructure**: Full automated test suite with 96 passing tests
+- **Testing Infrastructure**: Full automated test suite with 99 passing tests
 - **UI Components**: Radio buttons (Decimal/DMS), Cardinal directions checkbox
 - **Coordinate System**: Complete validation and formatting logic
 - **Two-Panel Layout**: Responsive sidebar and map layout working
 - **Dynamic Table Interface**: Points display as table rows with input row always available
 - **Input Order Toggle**: Radio buttons for lat/lon vs lon/lat interpretation
-
-### 🔄 In Progress
 - **Copy All to Clipboard**: Export functionality for complete coordinate list
+- **Fit to All Markers**: Map control button for automatically fitting view to all markers
 
 ### 🎯 Next Up (Phase 1 Priority)
-- **Copy to Clipboard**: Export current coordinate list functionality
 - **Marker Tooltips**: Show coordinate info on map marker hover
 
 ---
@@ -31,13 +29,13 @@ This plan outlines the steps to implement the remaining features for the GeoTool
     - [ ] Add visual cues for user interactions (e.g., hovering over list items highlights the map marker and vice-versa).
     - [x] ~~**Testing:** Manual testing and UI automation to ensure visual consistency and responsiveness.~~ **COMPLETED** ✅ (94 tests passing)
 2.  **Map View:** Implement core map features.
-    - [ ] Add a "fit to all markers" button to the map controls. **IN PROGRESS** 🔄
+    - [x] ~~Add a "fit to all markers" button to the map controls.~~ **COMPLETED** ✅
     - [ ] Implement tooltips for markers on the map to display point information.
     - [x] ~~**Testing:** Write unit and integration tests for map controls.~~ **COMPLETED** ✅
 3.  **Location List (Display & Interaction):** Implement the display and basic interaction features of the location list.
     - [x] ~~Add radio buttons to toggle the display format between Decimal Degrees and DMS.~~ **COMPLETED** ✅
     - [x] ~~Add a checkbox to toggle the display of cardinal directions (N, S, E, W).~~ **COMPLETED** ✅
-    - [ ] Add a button to copy the entire visible location list to the clipboard. **NEXT PRIORITY** 🎯
+    - [x] ~~Add a button to copy the entire visible location list to the clipboard.~~ **COMPLETED** ✅
     - [x] ~~**Testing:** Create unit tests for coordinate formatting functions and integration tests for the UI controls.~~ **COMPLETED** ✅ (80 coordinate tests + 8 UI tests)
 
 ### Phase 2: Advanced Features and Data Management

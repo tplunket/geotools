@@ -167,6 +167,29 @@
 			console.error('Failed to paste from clipboard: ', err);
 		}
 	}
+
+	function copyAllToClipboard() {
+		if (my_state.points.length === 0) {
+			alert('No coordinates to copy');
+			return;
+		}
+
+		const lines = my_state.points.map(point => {
+			if (inputOrder === 'lat-lon') {
+				return `${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
+			} else {
+				return `${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}, ${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}`;
+			}
+		});
+
+		const text = lines.join('\n');
+		navigator.clipboard.writeText(text).then(() => {
+			// Optional: Show success feedback
+		}).catch((err) => {
+			console.error('Failed to copy all coordinates: ', err);
+			alert('Failed to copy coordinates to clipboard');
+		});
+	}
 </script>
 
 <div class="coordinate-table">
@@ -284,6 +307,17 @@
 				/>
 				Show Cardinal Directions
 			</label>
+		</div>
+		
+		<div class="copy-all-control">
+			<button 
+				onclick={copyAllToClipboard}
+				class="copy-all-button"
+				disabled={my_state.points.length === 0}
+				title="Copy all coordinates to clipboard"
+			>
+				📋 Copy All
+			</button>
 		</div>
 	</div>
 	{#if currentError}
@@ -474,5 +508,42 @@
 	.copy-button:hover {
 		background-color: #4a90e2;
 		color: white;
+	}
+
+	.copy-all-control {
+		margin-top: 12px;
+		padding-top: 12px;
+		border-top: 1px solid #ddd;
+	}
+
+	.copy-all-button {
+		background-color: #4a90e2;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		padding: 8px 16px;
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.copy-all-button:hover:not(:disabled) {
+		background-color: #357abd;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.copy-all-button:disabled {
+		background-color: #e5e7eb;
+		color: #9ca3af;
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
 	}
 </style>

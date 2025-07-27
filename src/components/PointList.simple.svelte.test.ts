@@ -139,5 +139,33 @@ describe('PointList Component - Basic Tests', () => {
 			// Actual coordinate display order testing would require integration tests
 			expect(true).toBe(true); // Placeholder for successful order toggle
 		});
+
+		it('should render Copy All button', async () => {
+			render(PointList);
+			
+			// Check for Copy All button
+			const copyAllButton = page.getByTitle('Copy all coordinates to clipboard');
+			await expect(copyAllButton).toBeVisible();
+			
+			// Button should be disabled when no points exist
+			await expect(copyAllButton).toBeDisabled();
+		});
+
+		it('should enable Copy All button when points exist', async () => {
+			render(PointList);
+			
+			// Add a point through the UI by entering coordinates and clicking add
+			const latInput = page.getByPlaceholder('Latitude');
+			const lonInput = page.getByPlaceholder('Longitude');
+			const addButton = page.getByText('+');
+			
+			await latInput.fill('40.7589');
+			await lonInput.fill('-73.9851');
+			await addButton.click();
+			
+			// Copy All button should now be enabled
+			const copyAllButton = page.getByTitle('Copy all coordinates to clipboard');
+			await expect(copyAllButton).toBeEnabled();
+		});
 	});
 });
