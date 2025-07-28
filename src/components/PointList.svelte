@@ -4,8 +4,15 @@
 		isValidCoordinate,
 		validateLatitude
 	} from '$lib/coordinates';
+	import {
+		parseCoordinateStream,
+		analyzeCoordinateStream,
+		pairCoordinates,
+		exactToDecimal
+	} from '$lib/enhanced-coordinates';
 	import ErrorMessage from '$components/ErrorMessage.svelte';
-	import type { LatLon, Point, CoordinateFormat } from '$lib/types';
+	import CoordinatePreviewModal from '$components/CoordinatePreviewModal.svelte';
+	import type { LatLon, Point, CoordinateFormat, EditableCoordinatePair } from '$lib/types';
 	import { globals } from '$lib/global-data.svelte';
 
 	type State = {
@@ -29,6 +36,13 @@
 	let inputOrder = $state<'lat-lon' | 'lon-lat'>('lat-lon');
 	let currentError: { message: string; target: HTMLElement } | null =
 		$state(null);
+
+	// Enhanced coordinate system state
+	let showPreviewModal = $state(false);
+	let modalPairs: EditableCoordinatePair[] = $state([]);
+	let modalUnpaired: any[] = $state([]);
+	let modalAnalysis: any = $state(null);
+	let modalOriginalText = $state('');
 
 	function removePoint(index: number) {
 		my_state.points.splice(index, 1);
@@ -166,12 +180,22 @@
 	async function pasteFromClipboard() {
 		try {
 			const text = await navigator.clipboard.readText();
-			const coords = text.trim().split(/[,\s]+/);
-
+			
+			// Try enhanced coordinate parsing for multiple coordinates
+			const coords = parseCoordinateStream(text);
+			
 			if (coords.length >= 2) {
+				// Multiple coordinates detected - use enhanced system
+				handleEnhancedPaste(text);
+				return;
+			}
+			
+			// Fallback to simple parsing for single coordinate pair
+			const simpleCoords = text.trim().split(/[,\s]+/);
+			if (simpleCoords.length >= 2) {
 				// Parse the first two coordinate values
-				const first = coords[0].trim();
-				const second = coords[1].trim();
+				const first = simpleCoords[0].trim();
+				const second = simpleCoords[1].trim();
 
 				// Apply based on input order - first input gets first value, second input gets second value
 				if (inputOrder === 'lat-lon') {
@@ -204,6 +228,63 @@
 				console.error('Failed to copy all coordinates: ', err);
 				alert('Failed to copy coordinates to clipboard');
 			});
+	}
+
+	function handleEnhancedPaste(text: string) {
+		const coords = parseCoordinateStream(text);
+		const analysis = analyzeCoordinateStream(coords);
+		const pairingResult = pairCoordinates(coords, analysis, inputOrder);
+		
+		// Convert to editable format
+		modalPairs = pairingResult.pairs.map((pair, index) => ({
+			id: `pair-${index}`,
+			latitude: pair.first,
+			longitude: pair.second,
+			latitudeText: exactToDecimal(pair.first).toString(),
+			longitudeText: exactToDecimal(pair.second).toString(),
+			isValid: true,
+			errors: [],
+			confidence: pair.confidence
+		}));
+		
+		modalUnpaired = pairingResult.unpaired;
+		modalAnalysis = analysis;
+		modalOriginalText = text;
+		showPreviewModal = true;
+	}
+
+	function handleModalAccept(event: CustomEvent<{ pairs: EditableCoordinatePair[] }>) {
+		const validPairs = event.detail.pairs;
+		
+		for (const pair of validPairs) {
+			const latitude = exactToDecimal(pair.latitude);
+			const longitude = exactToDecimal(pair.longitude);
+			
+			// Add to local state
+			my_state.points.push({
+				latitude: latitude.toString(),
+				longitude: longitude.toString()
+			});
+			
+			// Add to global state
+			globals.points.push({
+				latitude,
+				longitude
+			});
+		}
+		
+		showPreviewModal = false;
+	}
+
+	function handleModalReject() {
+		showPreviewModal = false;
+	}
+
+	function handleModalRetry(event: CustomEvent<{ text: string }>) {
+		showPreviewModal = false;
+		setTimeout(() => {
+			handleEnhancedPaste(event.detail.text);
+		}, 100);
 	}
 </script>
 
@@ -271,7 +352,7 @@
 				value={my_state.latitude}
 				class="coord-input"
 				onkeydown={(e) => handleKeydown(e, 'latitude')}
-				oninput={(e) => (my_state.latitude = e.target.value)}
+				oninput={(e) => (my_state.latitude = (e.target as HTMLInputElement).value)}
 			/>
 		{/if}
 		<input
@@ -280,7 +361,7 @@
 			value={my_state.longitude}
 			class="coord-input"
 			onkeydown={(e) => handleKeydown(e, 'longitude')}
-			oninput={(e) => (my_state.longitude = e.target.value)}
+			oninput={(e) => (my_state.longitude = (e.target as HTMLInputElement).value)}
 		/>
 		{#if inputOrder !== 'lat-lon'}
 			<input
@@ -289,7 +370,7 @@
 				value={my_state.latitude}
 				class="coord-input"
 				onkeydown={(e) => handleKeydown(e, 'latitude')}
-				oninput={(e) => (my_state.latitude = e.target.value)}
+				oninput={(e) => (my_state.latitude = (e.target as HTMLInputElement).value)}
 			/>
 		{/if}
 		<button onclick={addPoint} class="add-button">+</button>
@@ -374,6 +455,19 @@
 		/>
 	{/if}
 </div>
+
+<!-- Enhanced Coordinate Preview Modal -->
+<CoordinatePreviewModal
+	bind:isOpen={showPreviewModal}
+	bind:pairs={modalPairs}
+	bind:unpaired={modalUnpaired}
+	bind:analysis={modalAnalysis}
+	bind:originalText={modalOriginalText}
+	bind:userOrder={inputOrder}
+	on:accept={handleModalAccept}
+	on:reject={handleModalReject}
+	on:retry={handleModalRetry}
+/>
 
 <style>
 	.coordinate-table {
