@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { formatCoordinate, isValidCoordinate, validateLatitude } from '$lib/coordinates';
+	import {
+		formatCoordinate,
+		isValidCoordinate,
+		validateLatitude
+	} from '$lib/coordinates';
 	import ErrorMessage from '$components/ErrorMessage.svelte';
 	import type { LatLon, Point, CoordinateFormat } from '$lib/types';
 	import { globals } from '$lib/global-data.svelte';
@@ -16,7 +20,7 @@
 	});
 
 	let displayFormat = $state<CoordinateFormat>('decimal');
-	
+
 	// Sync display format with global state for map tooltips
 	$effect(() => {
 		globals.displayFormat = displayFormat;
@@ -25,26 +29,6 @@
 	let inputOrder = $state<'lat-lon' | 'lon-lat'>('lat-lon');
 	let currentError: { message: string; target: HTMLElement } | null =
 		$state(null);
-	
-	// Computed values for the display order
-	let firstValue = $derived(inputOrder === 'lat-lon' ? my_state.latitude : my_state.longitude);
-	let secondValue = $derived(inputOrder === 'lat-lon' ? my_state.longitude : my_state.latitude);
-	
-	function setFirstValue(value: string) {
-		if (inputOrder === 'lat-lon') {
-			my_state.latitude = value;
-		} else {
-			my_state.longitude = value;
-		}
-	}
-	
-	function setSecondValue(value: string) {
-		if (inputOrder === 'lat-lon') {
-			my_state.longitude = value;
-		} else {
-			my_state.latitude = value;
-		}
-	}
 
 	function removePoint(index: number) {
 		my_state.points.splice(index, 1);
@@ -53,7 +37,7 @@
 
 	function addPoint() {
 		const { latitude, longitude } = my_state;
-		
+
 		// Basic validation for both coordinates
 		if (
 			!isValidCoordinate(latitude, true) ||
@@ -73,10 +57,12 @@
 		}
 
 		let finalLatitude = parseFloat(latitude);
-		
+
 		// Handle polar clamping and warning
 		if (latValidation.clampedValue !== undefined) {
-			const proceed = confirm(`${latValidation.warning}\n\nProceed with clamped value?`);
+			const proceed = confirm(
+				`${latValidation.warning}\n\nProceed with clamped value?`
+			);
 			if (!proceed) {
 				return;
 			}
@@ -159,13 +145,19 @@
 		}
 	}
 
-	function copyToClipboard(point: LatLon) {
-		let text: string;
+	function getPointFormatter(): (point: LatLon) => string {
 		if (inputOrder === 'lat-lon') {
-			text = `${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
+			return (point: LatLon) =>
+				`${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
 		} else {
-			text = `${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}, ${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}`;
+			return (point: LatLon) =>
+				`${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}, ${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}`;
 		}
+	}
+
+	function copyToClipboard(point: LatLon) {
+		const formatter = getPointFormatter();
+		const text = formatter(point);
 		navigator.clipboard.writeText(text).catch((err) => {
 			console.error('Failed to copy text: ', err);
 		});
@@ -175,19 +167,19 @@
 		try {
 			const text = await navigator.clipboard.readText();
 			const coords = text.trim().split(/[,\s]+/);
-			
+
 			if (coords.length >= 2) {
 				// Parse the first two coordinate values
 				const first = coords[0].trim();
 				const second = coords[1].trim();
-				
+
 				// Apply based on input order - first input gets first value, second input gets second value
 				if (inputOrder === 'lat-lon') {
 					my_state.latitude = first;
 					my_state.longitude = second;
 				} else {
-					my_state.longitude = first;  // First input is longitude in lon/lat mode
-					my_state.latitude = second;  // Second input is latitude in lon/lat mode
+					my_state.longitude = first; // First input is longitude in lon/lat mode
+					my_state.latitude = second; // Second input is latitude in lon/lat mode
 				}
 			}
 		} catch (err) {
@@ -201,21 +193,17 @@
 			return;
 		}
 
-		const lines = my_state.points.map(point => {
-			if (inputOrder === 'lat-lon') {
-				return `${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}, ${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}`;
-			} else {
-				return `${formatCoordinate(point.longitude, false, displayFormat, showCardinal)}, ${formatCoordinate(point.latitude, true, displayFormat, showCardinal)}`;
-			}
-		});
-
+		const lines = my_state.points.map(getPointFormatter());
 		const text = lines.join('\n');
-		navigator.clipboard.writeText(text).then(() => {
-			// Optional: Show success feedback
-		}).catch((err) => {
-			console.error('Failed to copy all coordinates: ', err);
-			alert('Failed to copy coordinates to clipboard');
-		});
+		navigator.clipboard
+			.writeText(text)
+			.then(() => {
+				// Optional: Show success feedback
+			})
+			.catch((err) => {
+				console.error('Failed to copy all coordinates: ', err);
+				alert('Failed to copy coordinates to clipboard');
+			});
 	}
 </script>
 
@@ -232,22 +220,41 @@
 					>
 						📋
 					</button>
+					{#if inputOrder === 'lat-lon'}
+						<div class="coord-display">
+							{formatCoordinate(
+								point.latitude,
+								true,
+								displayFormat,
+								showCardinal
+							)}
+						</div>
+					{/if}
 					<div class="coord-display">
-						{inputOrder === 'lat-lon' ? 
-							formatCoordinate(point.latitude, true, displayFormat, showCardinal) : 
-							formatCoordinate(point.longitude, false, displayFormat, showCardinal)}
+						{formatCoordinate(
+							point.longitude,
+							false,
+							displayFormat,
+							showCardinal
+						)}
 					</div>
-					<div class="coord-display">
-						{inputOrder === 'lat-lon' ? 
-							formatCoordinate(point.longitude, false, displayFormat, showCardinal) : 
-							formatCoordinate(point.latitude, true, displayFormat, showCardinal)}
-					</div>
-					<button onclick={() => removePoint(i)} class="remove-button">-</button>
+					{#if inputOrder !== 'lat-lon'}
+						<div class="coord-display">
+							{formatCoordinate(
+								point.latitude,
+								true,
+								displayFormat,
+								showCardinal
+							)}
+						</div>
+					{/if}
+					<button onclick={() => removePoint(i)} class="remove-button">-</button
+					>
 				</div>
 			{/each}
 		</div>
 	{/if}
-	
+
 	<!-- Input row (always last) -->
 	<div class="input-section">
 		<button
@@ -257,22 +264,34 @@
 		>
 			📋
 		</button>
+		{#if inputOrder === 'lat-lon'}
+			<input
+				type="text"
+				placeholder="Latitude"
+				value={my_state.latitude}
+				class="coord-input"
+				onkeydown={(e) => handleKeydown(e, 'latitude')}
+				oninput={(e) => (my_state.latitude = e.target.value)}
+			/>
+		{/if}
 		<input
 			type="text"
-			placeholder={inputOrder === 'lat-lon' ? 'Latitude' : 'Longitude'}
-			value={firstValue}
+			placeholder="Longitude"
+			value={my_state.longitude}
 			class="coord-input"
-			onkeydown={(e) => handleKeydown(e, inputOrder === 'lat-lon' ? 'latitude' : 'longitude')}
-			oninput={(e) => setFirstValue(e.target.value)}
+			onkeydown={(e) => handleKeydown(e, 'longitude')}
+			oninput={(e) => (my_state.longitude = e.target.value)}
 		/>
-		<input
-			type="text"
-			placeholder={inputOrder === 'lat-lon' ? 'Longitude' : 'Latitude'}
-			value={secondValue}
-			class="coord-input"
-			onkeydown={(e) => handleKeydown(e, inputOrder === 'lat-lon' ? 'longitude' : 'latitude')}
-			oninput={(e) => setSecondValue(e.target.value)}
-		/>
+		{#if inputOrder !== 'lat-lon'}
+			<input
+				type="text"
+				placeholder="Latitude"
+				value={my_state.latitude}
+				class="coord-input"
+				onkeydown={(e) => handleKeydown(e, 'latitude')}
+				oninput={(e) => (my_state.latitude = e.target.value)}
+			/>
+		{/if}
 		<button onclick={addPoint} class="add-button">+</button>
 	</div>
 </div>
@@ -301,7 +320,7 @@
 				Longitude / Latitude
 			</label>
 		</div>
-		
+
 		<div class="format-control">
 			<label>
 				<input
@@ -335,9 +354,9 @@
 				Show Cardinal Directions
 			</label>
 		</div>
-		
+
 		<div class="copy-all-control">
-			<button 
+			<button
 				onclick={copyAllToClipboard}
 				class="copy-all-button"
 				disabled={my_state.points.length === 0}
@@ -413,7 +432,6 @@
 		box-sizing: border-box;
 		margin-top: 12px;
 	}
-
 
 	.coord-input {
 		flex: 1;
@@ -495,7 +513,7 @@
 		display: flex;
 		gap: 16px;
 	}
-	
+
 	.format-control {
 		margin-bottom: 12px;
 		display: flex;
