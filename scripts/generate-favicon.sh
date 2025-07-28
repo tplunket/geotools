@@ -30,13 +30,13 @@ if [ ! -f "$SVG_FILE" ]; then
     exit 1
 fi
 
-# Convert SVG to PNG at 64x64 pixels with explicit transparency
+# Convert SVG to PNG at 32x32 pixels with explicit transparency and optimization
 echo "Using $CONVERT_CMD to convert favicon..."
-$CONVERT_CMD -background none "$SVG_FILE" -resize 64x64 "$PNG_FILE"
+$CONVERT_CMD -background none "$SVG_FILE" -resize 32x32 -strip -define png:compression-level=9 "$PNG_FILE"
 
 # Check if conversion was successful
 if [ $? -eq 0 ] && [ -f "$PNG_FILE" ]; then
-    echo "✅ Success! Generated $PNG_FILE (64x64 pixels)"
+    echo "✅ Success! Generated $PNG_FILE (32x32 pixels)"
 
     # Show file size
     if command -v ls &> /dev/null; then
