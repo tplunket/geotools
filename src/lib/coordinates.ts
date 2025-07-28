@@ -1,3 +1,34 @@
+import type { CoordinateValidationResult } from './types';
+
+// Practical latitude limit for marker display (rounded from Web Mercator limit of 85.05112878°)
+export const WEB_MERCATOR_LATITUDE_LIMIT = 85;
+
+export function validateLatitude(value: string): CoordinateValidationResult {
+	if (value === '' || isNaN(parseFloat(value))) {
+		return { isValid: false };
+	}
+
+	const num = parseFloat(value);
+	
+	// Basic range check
+	if (num < -90 || num > 90) {
+		return { isValid: false };
+	}
+
+	// Check for polar region issues
+	if (Math.abs(num) > WEB_MERCATOR_LATITUDE_LIMIT) {
+		const clampedValue = Math.sign(num) * WEB_MERCATOR_LATITUDE_LIMIT;
+		const pole = num > 0 ? 'North' : 'South';
+		return {
+			isValid: true,
+			clampedValue,
+			warning: `Latitude ${num}° is in the ${pole} polar region. Clamped to ${clampedValue}° for optimal marker display.`
+		};
+	}
+
+	return { isValid: true };
+}
+
 export function isValidCoordinate(value: string, isLatitude: boolean): boolean {
 	if (value === '' || isNaN(parseFloat(value))) return false;
 
